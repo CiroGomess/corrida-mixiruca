@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Menu, X, MapPin, Users, Camera, Phone } from 'lucide-react';
+import logoC from '../assets/Logo 1.png';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -17,13 +18,9 @@ const Header: React.FC = () => {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-cyan-400 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">M</span>
-            </div>
-            <div className="text-white">
-              <h1 className="text-xl font-bold leading-tight">CORRIDINHA</h1>
-              <p className="text-cyan-400 text-sm font-semibold leading-tight">MIXURUCA</p>
-            </div>
+            <a href="/">
+              <img src={logoC} alt="Logo" className="logo" />
+            </a>
           </div>
 
           {/* Desktop Navigation */}

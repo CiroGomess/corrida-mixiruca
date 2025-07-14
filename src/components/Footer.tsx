@@ -1,5 +1,6 @@
 import React from 'react';
 import { MapPin, Mail, Phone, Instagram, Facebook, Youtube, Heart, Leaf } from 'lucide-react';
+import logoC from '../assets/Logo.png';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -26,21 +27,15 @@ const Footer: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
               <div className="relative">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-cyan-400 rounded-full flex items-center justify-center transform rotate-12">
-                  <span className="text-white font-bold text-xl">M</span>
-                </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-fuchsia-500 rounded-full"></div>
+                <img src={logoC} alt="Logo" className="logo" />
               </div>
-              <div className="text-white">
-                <h3 className="text-lg font-bold">CORRIDINHA</h3>
-                <p className="text-cyan-400 text-sm font-semibold">MIXURUCA</p>
-              </div>
+
             </div>
-            
+
             <p className="text-gray-300 mb-4 italic">
               "A vida é uma trilha... e a gente corre ela rindo!"
             </p>
-            
+
             <div className="flex items-center space-x-2 text-gray-400">
               <Leaf className="w-5 h-5 text-green-400" />
               <span className="text-sm">Conectando pessoas à natureza</span>
@@ -123,7 +118,7 @@ const Footer: React.FC = () => {
                 </a>
               ))}
             </div>
-            
+
             <div className="bg-gradient-to-r from-purple-600/20 to-cyan-400/20 rounded-xl p-4 border border-purple-500/30">
               <p className="text-gray-300 text-sm">
                 📸 Compartilhe suas fotos com a hashtag{' '}
@@ -168,7 +163,7 @@ const Footer: React.FC = () => {
               Feito com muito ❤️ para os amantes de trilhas e diversão
             </p>
           </div>
-          
+
           <div className="flex space-x-6">
             <a
               href="#"
