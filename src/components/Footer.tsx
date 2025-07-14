@@ -189,6 +189,7 @@ const Footer: React.FC = () => {
             <span className="animate-bounce">🌿</span>
             <span className="animate-pulse">💧</span>
             <span className="animate-bounce">😄</span>
+            <span className="animate-bounce">Testes</span>
           </div>
         </div>
       </div>
