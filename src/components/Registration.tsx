@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Mail, Phone, MapPin, Calendar, CreditCard, Clock, Users, CheckCircle, AlertCircle } from 'lucide-react';
+import { User, CreditCard, Clock, Users, CheckCircle, AlertCircle } from 'lucide-react';
 
 const Registration: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -22,7 +22,7 @@ const Registration: React.FC = () => {
     seconds: 0
   });
 
-  const [currentBatch, setCurrentBatch] = useState(1);
+  const [currentBatch ] = useState(1);
   const [submitted, setSubmitted] = useState(false);
 
   const routes = [
