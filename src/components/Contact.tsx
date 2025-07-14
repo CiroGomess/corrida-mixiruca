@@ -1,19 +1,19 @@
 import React from 'react';
-import { Mail, Phone, MessageCircle, MapPin, Clock, Instagram, Facebook, Youtube } from 'lucide-react';
+import { Mail, Phone, MessageCircle, MapPin, Instagram, Facebook, Youtube } from 'lucide-react';
 
 const Contact: React.FC = () => {
   const contactInfo = [
     {
       icon: Mail,
       title: 'E-mail',
-      value: 'contato@corridinhamixuruca.com.br',
+      value: ' Eudesbolinhadefogo@gmail.com',
       description: 'Resposta em até 24h',
       color: 'from-purple-400 to-purple-600'
     },
     {
       icon: Phone,
       title: 'WhatsApp',
-      value: '(83) 99999-9999',
+      value: '(83) 98860-1815',
       description: 'Seg à Sex, 8h às 18h',
       color: 'from-green-400 to-green-600'
     },
@@ -23,13 +23,6 @@ const Contact: React.FC = () => {
       value: 'João Pessoa - PB',
       description: 'Trilhas da Paraíba',
       color: 'from-cyan-400 to-cyan-600'
-    },
-    {
-      icon: Clock,
-      title: 'Horário',
-      value: 'Seg à Sex',
-      description: '8h às 18h',
-      color: 'from-orange-400 to-orange-600'
     }
   ];
 
@@ -98,7 +91,7 @@ const Contact: React.FC = () => {
               Entre em Contato
             </h3>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {contactInfo.map((info, index) => (
                 <div key={index} className="text-center">
                   <div className={`w-16 h-16 rounded-full bg-gradient-to-r ${info.color} flex items-center justify-center mx-auto mb-4`}>
@@ -112,7 +105,7 @@ const Contact: React.FC = () => {
             </div>
 
             <div className="border-t border-gray-700/50 pt-8">
-              <h4 className="text-lg font-semibold text-white mb-6 text-center">Siga a Lama! 🌿</h4>
+              {/* <h4 className="text-lg font-semibold text-white mb-6 text-center">Siga a Lama! 🌿</h4> */}
               <div className="flex justify-center space-x-6">
                 {socialLinks.map((social, index) => (
                   <a
@@ -158,7 +151,7 @@ const Contact: React.FC = () => {
               esclarecer tudo para você viver a melhor experiência mixuruca possível! 💪
             </p>
             <a
-              href="https://wa.me/5583999999999"
+              href="https://wa.me/558388601815?text=Olá!%20Gostaria%20de%20mais%20informações%20sobre%20a%20corrida%20mixuruca."
               className="inline-flex items-center space-x-2 bg-gradient-to-r from-green-600 to-green-400 text-white px-8 py-4 rounded-full font-bold hover:scale-105 transform transition-all duration-200"
             >
               <MessageCircle className="w-5 h-5" />

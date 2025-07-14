@@ -14,9 +14,9 @@ const Footer: React.FC = () => {
   ];
 
   const socialLinks = [
-    { icon: Instagram, href: '#', label: 'Instagram' },
-    { icon: Facebook, href: '#', label: 'Facebook' },
-    { icon: Youtube, href: '#', label: 'YouTube' }
+    { icon: Instagram, href: 'https://www.instagram.com/corridinhamixuruca.oficial/#', label: 'Instagram' },
+    { icon: Facebook, href: 'https://www.instagram.com/corridinhamixuruca.oficial/#', label: 'Facebook' },
+    { icon: Youtube, href: 'https://www.instagram.com/corridinhamixuruca.oficial/#', label: 'YouTube' }
   ];
 
   return (
@@ -73,19 +73,19 @@ const Footer: React.FC = () => {
               <div className="flex items-center space-x-3">
                 <Mail className="w-4 h-4 text-gray-400" />
                 <a
-                  href="mailto:contato@corridinhamixuruca.com.br"
+                  href="mailto:Eudesbolinhadefogo@gmail.com"
                   className="text-gray-300 hover:text-cyan-400 transition-colors text-sm"
                 >
-                  contato@corridinhamixuruca.com.br
+                  Eudesbolinhadefogo@gmail.com
                 </a>
               </div>
               <div className="flex items-center space-x-3">
                 <Phone className="w-4 h-4 text-gray-400" />
                 <a
-                  href="https://wa.me/5583999999999"
+                  href="https://wa.me/558388601815"
                   className="text-gray-300 hover:text-cyan-400 transition-colors text-sm"
                 >
-                  (83) 99999-9999
+                  (83) 98860-1815
                 </a>
               </div>
               <div className="flex items-center space-x-3">
@@ -110,11 +110,12 @@ const Footer: React.FC = () => {
                   href={social.href}
                   className="flex items-center space-x-3 text-gray-300 hover:text-white transition-colors group"
                   aria-label={social.label}
+                  target='_blank'
                 >
                   <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center group-hover:bg-gradient-to-r group-hover:from-purple-600 group-hover:to-cyan-400 transition-all duration-300">
                     <social.icon className="w-4 h-4" />
                   </div>
-                  <span className="text-sm">@corridinhamixuruca</span>
+                  <span className="text-sm">@corridinhamixurucaoficial</span>
                 </a>
               ))}
             </div>
@@ -132,7 +133,7 @@ const Footer: React.FC = () => {
         <div className="my-12 border-t border-gray-800/50"></div>
 
         {/* Newsletter */}
-        <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50 mb-12">
+        {/* <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50 mb-12">
           <div className="text-center">
             <h3 className="text-2xl font-bold text-white mb-4">
               Fique Por Dentro das Próximas Aventuras! 🌿
@@ -151,7 +152,7 @@ const Footer: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
