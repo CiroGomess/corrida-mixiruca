@@ -20,7 +20,7 @@ const Hero: React.FC = () => {
         <div className="max-w-4xl mx-auto text-center">
           {/* Main Title */}
           <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-6 leading-tight drop-shadow-lg">
-            <span className="block mb-2">CORRIDINHA</span>
+            <span className="block mb-2">CORRIDA</span>
             <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent animate-pulse">
               MIXURUCA
             </span>
