@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Mail, Phone, Instagram, Facebook, Youtube, Heart, Leaf } from 'lucide-react';
+import { MapPin, Mail, Phone, Instagram, Youtube, Heart, Leaf } from 'lucide-react';
 import logoC from '../assets/Logo.png';
 
 const Footer: React.FC = () => {
@@ -15,7 +15,6 @@ const Footer: React.FC = () => {
 
   const socialLinks = [
     { icon: Instagram, href: 'https://www.instagram.com/corridinhamixuruca.oficial/#', label: 'Instagram' },
-    { icon: Facebook, href: 'https://www.instagram.com/corridinhamixuruca.oficial/#', label: 'Facebook' },
     { icon: Youtube, href: 'https://www.instagram.com/corridinhamixuruca.oficial/#', label: 'YouTube' }
   ];
 
@@ -101,7 +100,7 @@ const Footer: React.FC = () => {
           <div>
             <h4 className="text-white font-bold text-lg mb-4 flex items-center">
               <Heart className="w-5 h-5 mr-2 text-fuchsia-400" />
-              Siga a Lama!
+              Siga a Corrida Mixuruxca!
             </h4>
             <div className="space-y-3 mb-6">
               {socialLinks.map((social, index) => (
@@ -158,7 +157,7 @@ const Footer: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <div className="text-center md:text-left">
             <p className="text-gray-400 text-sm">
-              Corridinha Mixuruca © {currentYear} - Corra, Ria, Repita!
+              Corrida Mixuruca © {currentYear} - Corra, Ria, Repita!
             </p>
             <p className="text-gray-500 text-xs mt-1">
               Feito com muito ❤️ para os amantes de trilhas e diversão
