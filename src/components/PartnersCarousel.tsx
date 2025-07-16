@@ -31,7 +31,7 @@ const PartnersCarousel: React.FC = () => {
     dots: false,
     infinite: true,
     speed: 600,
-    slidesToShow: 6,
+    slidesToShow: 8,
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 3500,
@@ -39,10 +39,10 @@ const PartnersCarousel: React.FC = () => {
     cssEase: 'ease-in-out',
     arrows: false,
     responsive: [
-      { breakpoint: 1280, settings: { slidesToShow: 4 } },
-      { breakpoint: 1024, settings: { slidesToShow: 3 } },
-      { breakpoint: 768, settings: { slidesToShow: 2 } },
-      { breakpoint: 480, settings: { slidesToShow: 1 } },
+      { breakpoint: 1280, settings: { slidesToShow: 4, slidesToScroll: 1 } },
+      { breakpoint: 1024, settings: { slidesToShow: 3, slidesToScroll: 1 } },
+      { breakpoint: 768, settings: { slidesToShow: 2, slidesToScroll: 1 } },
+      { breakpoint: 480, settings: { slidesToShow: 3, slidesToScroll: 1 } }, // Mobile: 3 slides
     ]
   };
 
@@ -73,7 +73,9 @@ const PartnersCarousel: React.FC = () => {
                 <img
                   src={partner.logo}
                   alt={`Parceiro ${index + 1}`}
-                  className="max-w-[200px] max-h-[200px] rounded-2xl border border-white/20 shadow-md transition-all duration-300 object-contain grayscale group-hover:grayscale-0"
+                  // Tamanho padrão para mobile (até 767px)
+                  // Para telas maiores, volta para max-w-[200px] max-h-[200px]
+                  className="w-[100px] h-[100px] md:max-w-[200px] md:max-h-[200px] rounded-2xl border border-white/20 shadow-md transition-all duration-300 object-contain grayscale group-hover:grayscale-0"
                 />
               </a>
             </div>
