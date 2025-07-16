@@ -10,6 +10,7 @@ import Img6 from '../assets/parceiros/6.jpg';
 import Img7 from '../assets/parceiros/7.jpg';
 import Img8 from '../assets/parceiros/8.jpg';
 import Img9 from '../assets/parceiros/9.jpg';
+import Img10 from '../assets/parceiros/10.jpg';
 
 interface Partner {
   logo: string;
@@ -26,6 +27,7 @@ const partners: Partner[] = [
   { logo: Img7, url: 'https://www.instagram.com/oticalanordestina/#' },
   { logo: Img8, url: 'https://www.instagram.com/corretoraangelinecunha/#' },
   { logo: Img9, url: 'https://www.instagram.com/bayeuxburguer/#' },
+  { logo: Img10, url: 'https://www.instagram.com/unibe_joaopessoa/#' },
 ];
 
 const PartnersCarousel: React.FC = () => {
@@ -44,7 +46,7 @@ const PartnersCarousel: React.FC = () => {
       { breakpoint: 1280, settings: { slidesToShow: 4, slidesToScroll: 1 } },
       { breakpoint: 1024, settings: { slidesToShow: 3, slidesToScroll: 1 } },
       { breakpoint: 768, settings: { slidesToShow: 2, slidesToScroll: 1 } },
-      { breakpoint: 480, settings: { slidesToShow: 3, slidesToScroll: 1 } }, // Mobile: 3 slides
+      { breakpoint: 480, settings: { slidesToShow: 3, slidesToScroll: 1 } }, 
     ]
   };
 
