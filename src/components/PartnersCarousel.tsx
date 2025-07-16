@@ -9,6 +9,7 @@ import Img5 from '../assets/parceiros/5.jpg';
 import Img6 from '../assets/parceiros/6.jpg';
 import Img7 from '../assets/parceiros/7.jpg';
 import Img8 from '../assets/parceiros/8.jpg';
+import Img9 from '../assets/parceiros/9.jpg';
 
 interface Partner {
   logo: string;
@@ -24,6 +25,7 @@ const partners: Partner[] = [
   { logo: Img6, url: 'https://www.instagram.com/scorpionsuplementos_oficial/#' },
   { logo: Img7, url: 'https://www.instagram.com/oticalanordestina/#' },
   { logo: Img8, url: 'https://www.instagram.com/corretoraangelinecunha/#' },
+  { logo: Img9, url: 'https://www.instagram.com/bayeuxburguer/#' },
 ];
 
 const PartnersCarousel: React.FC = () => {
