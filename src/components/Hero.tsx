@@ -1,7 +1,7 @@
 import React from 'react';
 import { PlayCircle, ArrowRight, Zap, Leaf } from 'lucide-react';
 
-import IMG from '../assets/trilha/3.jpg';
+import IMG from '../assets/trilha/10.jpg';
 
 const Hero: React.FC = () => {
   return (
