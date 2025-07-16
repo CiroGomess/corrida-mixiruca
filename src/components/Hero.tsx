@@ -1,6 +1,8 @@
 import React from 'react';
 import { PlayCircle, ArrowRight, Zap, Leaf } from 'lucide-react';
 
+import IMG from '../assets/trilha/3.jpg';
+
 const Hero: React.FC = () => {
   return (
     <section className="relative min-h-screen flex items-center justify-center text-white overflow-hidden">
@@ -9,7 +11,7 @@ const Hero: React.FC = () => {
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         // *** AQUI É ONDE VOCÊ DEVE MUDAR! ***
         // O caminho '/images/corrida-mixuruca-bg.jpg' assume que a imagem está em public/images/
-        style={{ backgroundImage: "url('https://img.freepik.com/fotos-gratis/diferentes-pessoas-participando-de-um-cross-country_23-2149157132.jpg?uid=R14650917&ga=GA1.1.362152280.1746682393&semt=ais_hybrid&w=740')" }} 
+        style={{ backgroundImage: `url(${IMG})` }}
       >
         {/* Overlay para escurecer a imagem e melhorar a leitura do texto */}
         <div className="absolute inset-0 bg-black opacity-60"></div> 

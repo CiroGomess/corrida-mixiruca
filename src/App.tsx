@@ -1,4 +1,4 @@
-;import Header from './components/Header';
+import Header from './components/Header';
 import Hero from './components/Hero';
 import About from './components/About';
 import HowItWorks from './components/HowItWorks';
@@ -7,6 +7,9 @@ import Gallery from './components/Gallery';
 import Registration from './components/Registration';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
+import PartnersCarousel from './components/PartnersCarousel';
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 function App() {
   return (
@@ -20,6 +23,8 @@ function App() {
         <Gallery />
         <Registration />
         <Contact />
+
+        <PartnersCarousel />
       </main>
       <Footer />
     </div>

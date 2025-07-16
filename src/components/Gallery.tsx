@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { Camera, Heart, Share2, ExternalLink } from 'lucide-react';
+import { Camera, Share2, ExternalLink } from 'lucide-react';
+
+import Img1 from '../assets/trilha/1.jpg';
+import Img2 from '../assets/trilha/2.jpg';
+import Img3 from '../assets/trilha/3.jpg';
+import Img4 from '../assets/trilha/4.jpg';
+import Img5 from '../assets/trilha/5.jpg';
+import Img6 from '../assets/trilha/6.jpg';
+import Img7 from '../assets/trilha/7.jpg';
+import Img8 from '../assets/trilha/8.jpg';
+
+
 
 const Gallery: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
@@ -7,67 +18,66 @@ const Gallery: React.FC = () => {
   const galleryImages = [
     {
       id: 1,
-      url: 'https://images.pexels.com/photos/2402926/pexels-photo-2402926.jpeg?auto=compress&cs=tinysrgb&w=800',
+      url: Img1,
       title: 'Começando a Aventura',
       description: 'Grupo animado no início da trilha, todos com um sorriso no rosto!',
       category: 'Largada'
     },
     {
       id: 2,
-      url: 'https://images.pexels.com/photos/1571939/pexels-photo-1571939.jpeg?auto=compress&cs=tinysrgb&w=800',
+      url: Img2,
       title: 'Banho de Lama Garantido',
       description: 'Quem disse que precisa ficar limpo para ser feliz?',
       category: 'Diversão'
     },
     {
       id: 3,
-      url: 'https://images.pexels.com/photos/2402922/pexels-photo-2402922.jpeg?auto=compress&cs=tinysrgb&w=800',
+      url: Img3,
       title: 'Paisagem Incrível',
       description: 'Os visuais da trilha que fazem tudo valer a pena!',
       category: 'Natureza'
     },
     {
       id: 4,
-      url: 'https://images.pexels.com/photos/1571940/pexels-photo-1571940.jpeg?auto=compress&cs=tinysrgb&w=800',
+      url: Img4,
       title: 'Amigos para Sempre',
       description: 'As melhores amizades nascem na lama!',
       category: 'Amizade'
     },
     {
       id: 5,
-      url: 'https://images.pexels.com/photos/2402923/pexels-photo-2402923.jpeg?auto=compress&cs=tinysrgb&w=800',
+      url: Img5,
       title: 'Superação Divertida',
       description: 'Cada obstáculo é uma nova oportunidade de rir!',
       category: 'Desafio'
     },
     {
       id: 6,
-      url: 'https://images.pexels.com/photos/1571938/pexels-photo-1571938.jpeg?auto=compress&cs=tinysrgb&w=800',
+      url: Img6,
       title: 'Chegada Épica',
       description: 'O sorriso de quem completou a Mixuruca é impagável!',
       category: 'Chegada'
     },
     {
       id: 7,
-      url: 'https://images.pexels.com/photos/2402928/pexels-photo-2402928.jpeg?auto=compress&cs=tinysrgb&w=800',
+      url: Img7,
       title: 'Selfie Enlameada',
       description: 'A foto mais autêntica que você já tirou!',
       category: 'Momentos'
     },
     {
       id: 8,
-      url: 'https://images.pexels.com/photos/1571937/pexels-photo-1571937.jpeg?auto=compress&cs=tinysrgb&w=800',
+      url: Img8,
       title: 'Família Mixuruca',
       description: 'Todos unidos pela paixão de não se levar tão a sério!',
       category: 'Comunidade'
     }
   ];
-
   const categories = ['Todas', 'Largada', 'Diversão', 'Natureza', 'Amizade', 'Desafio', 'Chegada', 'Momentos', 'Comunidade'];
   const [activeCategory, setActiveCategory] = useState('Todas');
 
-  const filteredImages = activeCategory === 'Todas' 
-    ? galleryImages 
+  const filteredImages = activeCategory === 'Todas'
+    ? galleryImages
     : galleryImages.filter(img => img.category === activeCategory);
 
   return (
@@ -80,9 +90,9 @@ const Gallery: React.FC = () => {
               Memórias (e Tombos!) 📸
             </span>
           </h2>
-          
+
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Reviva os melhores momentos das edições passadas e se inspire 
+            Reviva os melhores momentos das edições passadas e se inspire
             para viver sua própria aventura mixuruca!
           </p>
         </div>
@@ -93,11 +103,10 @@ const Gallery: React.FC = () => {
             <button
               key={category}
               onClick={() => setActiveCategory(category)}
-              className={`px-4 py-2 rounded-full font-medium transition-all duration-300 ${
-                activeCategory === category
+              className={`px-4 py-2 rounded-full font-medium transition-all duration-300 ${activeCategory === category
                   ? 'bg-gradient-to-r from-purple-600 to-cyan-400 text-white'
                   : 'bg-black/40 text-gray-300 hover:bg-black/60'
-              }`}
+                }`}
             >
               {category}
             </button>
@@ -119,7 +128,7 @@ const Gallery: React.FC = () => {
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 />
               </div>
-              
+
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <div className="absolute bottom-0 left-0 right-0 p-4">
                   <h3 className="text-white font-bold text-lg mb-1">{image.title}</h3>
@@ -129,9 +138,6 @@ const Gallery: React.FC = () => {
 
               <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <div className="flex space-x-2">
-                  <button className="w-8 h-8 bg-black/60 rounded-full flex items-center justify-center hover:bg-purple-600 transition-colors">
-                    <Heart className="w-4 h-4 text-white" />
-                  </button>
                   <button className="w-8 h-8 bg-black/60 rounded-full flex items-center justify-center hover:bg-cyan-600 transition-colors">
                     <Share2 className="w-4 h-4 text-white" />
                   </button>
@@ -157,7 +163,7 @@ const Gallery: React.FC = () => {
                   alt={filteredImages[selectedImage].title}
                   className="w-full h-auto max-h-96 object-cover"
                 />
-                
+
                 <button
                   onClick={() => setSelectedImage(null)}
                   className="absolute top-4 right-4 w-10 h-10 bg-black/60 rounded-full flex items-center justify-center hover:bg-purple-600 transition-colors"
@@ -165,7 +171,7 @@ const Gallery: React.FC = () => {
                   <span className="text-white text-xl">×</span>
                 </button>
               </div>
-              
+
               <div className="p-6">
                 <h3 className="text-2xl font-bold text-white mb-2">
                   {filteredImages[selectedImage].title}
@@ -173,17 +179,14 @@ const Gallery: React.FC = () => {
                 <p className="text-gray-300 text-lg mb-4">
                   {filteredImages[selectedImage].description}
                 </p>
-                
+
                 <div className="flex items-center justify-between">
                   <span className="bg-gradient-to-r from-purple-600 to-cyan-400 text-white px-3 py-1 rounded-full text-sm font-medium">
                     {filteredImages[selectedImage].category}
                   </span>
-                  
+
                   <div className="flex space-x-4">
-                    <button className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors">
-                      <Heart className="w-5 h-5" />
-                      <span>Curtir</span>
-                    </button>
+            
                     <button className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors">
                       <Share2 className="w-5 h-5" />
                       <span>Compartilhar</span>
@@ -202,10 +205,10 @@ const Gallery: React.FC = () => {
               Quer Aparecer na Próxima Galeria?
             </h3>
             <p className="text-gray-300 mb-6">
-              Venha viver sua própria aventura mixuruca e criar memórias inesquecíveis! 
+              Venha viver sua própria aventura mixuruca e criar memórias inesquecíveis!
               Garante que vamos capturar todos os seus melhores momentos na lama! 📷
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
                 href="#registration"
@@ -214,7 +217,7 @@ const Gallery: React.FC = () => {
                 <Camera className="w-5 h-5" />
                 <span>Participar da Próxima</span>
               </a>
-              
+
               <a
                 href="https://www.instagram.com/corridinhamixuruca.oficial/"
                 className="inline-flex items-center space-x-2 border-2 border-white/30 text-white px-8 py-4 rounded-full font-semibold hover:bg-white/10 transition-all duration-200"
