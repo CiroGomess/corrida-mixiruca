@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { User, CreditCard, Clock, Users, CheckCircle, AlertCircle } from 'lucide-react';
+import { User, CreditCard, Clock, Users, CheckCircle, AlertCircle, Percent } from 'lucide-react'; // Adicionado Percent icon
 
 const Registration: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    route: '',
+    route: [] as string[],
     shirtSize: '',
     emergencyContact: '',
     emergencyPhone: '',
     experience: '',
     dietary: '',
-    agreement: false
+    agreement: false,
+    coupon: '' // Novo campo para o cupom
   });
 
   const [timeLeft, setTimeLeft] = useState({
@@ -22,31 +23,37 @@ const Registration: React.FC = () => {
     seconds: 0
   });
 
-  const [currentBatch ] = useState(1);
+  const [currentBatch] = useState(1);
   const [submitted, setSubmitted] = useState(false);
+  const [couponError, setCouponError] = useState(''); // Estado para mensagens de erro do cupom
 
   const routes = [
-    { id: '5km', name: 'Passeio no Parque - 5km', price: 'R$ 45,00' },
-    { id: '10km', name: 'Subida do Perrengue Leve - 10km', price: 'R$ 55,00' },
-    { id: '15km', name: 'A Lama Chega no Joelho - 15km', price: 'R$ 65,00' }
+    { id: '5km', name: 'Passeio no Parque - 5km', price: 45.00 },
+    { id: '10km', name: 'Subida do Perrengue Leve - 10km', price: 55.00 },
+    { id: '15km', name: 'A Lama Chega no Joelho - 15km', price: 65.00 }
   ];
 
   const shirtSizes = ['PP', 'P', 'M', 'G', 'GG', 'XGG'];
 
   const batches = [
-    { number: 1, name: 'Super Desconto', period: 'Até 15/12', discount: '30%', available: true },
-    { number: 2, name: 'Desconto Mixuruca', period: 'Até 31/12', discount: '20%', available: true },
-    { number: 3, name: 'Última Chance', period: 'Até 15/01', discount: '10%', available: false }
+    { number: 1, name: 'Super Desconto', period: 'Até 15/12', discount: '30%', available: true }
   ];
+
+  // Cupons de exemplo (em um cenário real, viriam de um backend)
+  const availableCoupons: { [key: string]: number } = {
+    CORRE10: 0.10, // 10% de desconto
+    TRILHA20: 0.20, // 20% de desconto
+    MIXURUCA50: 0.50 // 50% de desconto
+  };
 
   // Countdown Timer
   useEffect(() => {
     const targetDate = new Date('2025-02-15T00:00:00').getTime();
-    
+
     const interval = setInterval(() => {
       const now = new Date().getTime();
       const distance = targetDate - now;
-      
+
       if (distance > 0) {
         setTimeLeft({
           days: Math.floor(distance / (1000 * 60 * 60 * 24)),
@@ -54,6 +61,9 @@ const Registration: React.FC = () => {
           minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
           seconds: Math.floor((distance % (1000 * 60)) / 1000)
         });
+      } else {
+        clearInterval(interval);
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
       }
     }, 1000);
 
@@ -62,30 +72,74 @@ const Registration: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    
+
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData(prev => ({ ...prev, [name]: checked }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
+      // Limpa o erro do cupom ao digitar
+      if (name === 'coupon') {
+        setCouponError('');
+      }
     }
   };
 
+  const handleRouteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value, checked } = e.target;
+    setFormData(prev => {
+      const newRoutes = checked
+        ? [...prev.route, value]
+        : prev.route.filter(routeId => routeId !== value);
+      return { ...prev, route: newRoutes };
+    });
+  };
+
+  const calculateTotalPrice = () => {
+    let subtotal = formData.route.reduce((total, routeId) => {
+      const selectedRoute = routes.find(r => r.id === routeId);
+      return total + (selectedRoute ? selectedRoute.price : 0);
+    }, 0);
+
+    const couponCode = formData.coupon.toUpperCase();
+    if (availableCoupons[couponCode]) {
+      const discount = subtotal * availableCoupons[couponCode];
+      subtotal -= discount;
+    }
+
+    return subtotal;
+  };
+
+  const validateCoupon = () => {
+    const couponCode = formData.coupon.toUpperCase();
+    if (formData.coupon === '') {
+      setCouponError(''); // Limpa erro se o campo estiver vazio
+      return;
+    }
+    if (availableCoupons[couponCode]) {
+      setCouponError('Cupom válido!');
+    } else {
+      setCouponError('Cupom inválido.');
+    }
+  };
+
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would normally send the data to your backend
-    console.log('Form submitted:', formData);
+    // Você pode querer validar o cupom novamente no submit aqui,
+    // ou apenas usar o valor do totalPrice que já considera o cupom.
+    console.log('Form submitted:', { ...formData, totalPrice: calculateTotalPrice() });
     setSubmitted(true);
   };
 
   const isFormValid = () => {
-    return formData.name && 
-           formData.email && 
-           formData.phone && 
-           formData.route && 
-           formData.shirtSize && 
-           formData.emergencyContact && 
-           formData.emergencyPhone && 
+    return formData.name &&
+           formData.email &&
+           formData.phone &&
+           formData.route.length > 0 &&
+           formData.shirtSize &&
+           formData.emergencyContact &&
+           formData.emergencyPhone &&
            formData.agreement;
   };
 
@@ -100,7 +154,7 @@ const Registration: React.FC = () => {
                 Inscrição Realizada com Sucesso! 🎉
               </h2>
               <p className="text-gray-300 mb-6">
-                Parabéns! Você está oficialmente inscrito na Corridinha Mixuruca! 
+                Parabéns! Você está oficialmente inscrito na Corridinha Mixuruca!
                 Em breve você receberá um e-mail com todas as informações.
               </p>
               <div className="bg-gradient-to-r from-purple-600/20 to-cyan-400/20 rounded-xl p-6 border border-purple-500/30">
@@ -118,6 +172,12 @@ const Registration: React.FC = () => {
     );
   }
 
+  const selectedRoutesDetails = formData.route.map(routeId =>
+    routes.find(r => r.id === routeId)
+  ).filter(Boolean);
+
+  const totalPrice = calculateTotalPrice();
+
   return (
     <section id="registration" className="py-20 bg-gradient-to-br from-gray-900 via-black to-gray-900">
       <div className="container mx-auto px-4">
@@ -128,9 +188,9 @@ const Registration: React.FC = () => {
               Vagas Limitadas para Tanta Diversão! 🎟️
             </span>
           </h2>
-          
+
           <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-8">
-            Não perca a chance de viver essa experiência única! 
+            Não perca a chance de viver essa experiência única!
             As vagas são limitadas para manter nossa vibe familiar e divertida.
           </p>
 
@@ -169,7 +229,7 @@ const Registration: React.FC = () => {
                 <CreditCard className="w-6 h-6 mr-2 text-cyan-400" />
                 Lotes e Preços
               </h3>
-              
+
               <div className="space-y-4 mb-6">
                 {batches.map((batch) => (
                   <div
@@ -196,16 +256,25 @@ const Registration: React.FC = () => {
                 ))}
               </div>
 
+              {/* Percursos Selecionados e Total */}
               <div className="border-t border-gray-700/50 pt-4">
-                <h4 className="text-lg font-semibold text-white mb-3">Percursos Disponíveis:</h4>
-                <div className="space-y-2">
-                  {routes.map((route) => (
-                    <div key={route.id} className="flex justify-between items-center text-sm">
-                      <span className="text-gray-300">{route.name}</span>
-                      <span className="text-cyan-400 font-medium">{route.price}</span>
+                <h4 className="text-lg font-semibold text-white mb-3">Seus Percursos:</h4>
+                {selectedRoutesDetails.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedRoutesDetails.map((route) => (
+                      <div key={route!.id} className="flex justify-between items-center text-sm">
+                        <span className="text-gray-300">{route!.name}</span>
+                        <span className="text-cyan-400 font-medium">R$ {route!.price.toFixed(2).replace('.', ',')}</span>
+                      </div>
+                    ))}
+                    <div className="flex justify-between items-center text-base font-bold text-white mt-4 pt-2 border-t border-gray-700/50">
+                      <span>Total:</span>
+                      <span className="text-green-400">R$ {totalPrice.toFixed(2).replace('.', ',')}</span>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ) : (
+                  <p className="text-gray-400 text-sm">Nenhum percurso selecionado.</p>
+                )}
               </div>
 
               <div className="mt-6 bg-gradient-to-r from-green-600/20 to-teal-400/20 rounded-xl p-4 border border-green-500/30">
@@ -284,29 +353,53 @@ const Registration: React.FC = () => {
               </div>
 
               <div className="mb-8">
-                <label className="block text-gray-300 font-medium mb-2">Percurso Escolhido *</label>
+                <label className="block text-gray-300 font-medium mb-2">Percurso(s) Escolhido(s) *</label>
                 <div className="grid md:grid-cols-3 gap-4">
                   {routes.map((route) => (
                     <label
                       key={route.id}
                       className={`cursor-pointer p-4 rounded-xl border transition-all ${
-                        formData.route === route.id
+                        formData.route.includes(route.id)
                           ? 'bg-gradient-to-r from-purple-600/20 to-cyan-400/20 border-purple-500/50'
                           : 'bg-black/30 border-gray-700/50 hover:border-gray-600/50'
                       }`}
                     >
                       <input
-                        type="radio"
+                        type="checkbox"
                         name="route"
                         value={route.id}
-                        checked={formData.route === route.id}
-                        onChange={handleInputChange}
-                        className="sr-only"
+                        checked={formData.route.includes(route.id)}
+                        onChange={handleRouteChange}
+                        className="mr-2 mt-1 w-4 h-4 text-cyan-400 bg-black/30 border border-gray-700/50 rounded focus:ring-cyan-400 focus:ring-2"
                       />
                       <div className="text-white font-semibold mb-1">{route.name}</div>
-                      <div className="text-cyan-400 font-medium">{route.price}</div>
+                      <div className="text-cyan-400 font-medium">R$ {route.price.toFixed(2).replace('.', ',')}</div>
                     </label>
                   ))}
+                </div>
+              </div>
+
+              {/* Campo do Cupom */}
+              <div className="mb-8">
+                <label className="block text-gray-300 font-medium mb-2 flex items-center">
+                  <Percent className="w-5 h-5 mr-2 text-purple-400" />
+                  Cupom de Desconto (opcional)
+                </label>
+                <div className="flex items-center">
+                  <input
+                    type="text"
+                    name="coupon"
+                    value={formData.coupon}
+                    onChange={handleInputChange}
+                    onBlur={validateCoupon} // Valida quando o campo perde o foco
+                    className="w-full px-4 py-3 bg-black/30 border border-gray-700/50 rounded-xl text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none transition-colors"
+                    placeholder="Insira seu cupom aqui"
+                  />
+                  {couponError && (
+                    <span className={`ml-3 text-sm font-medium ${couponError === 'Cupom válido!' ? 'text-green-400' : 'text-red-400'}`}>
+                      {couponError}
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -385,7 +478,7 @@ const Registration: React.FC = () => {
                     <a href="#" className="text-cyan-400 hover:text-cyan-300">Termos e Condições</a>
                     {' '}e{' '}
                     <a href="#" className="text-cyan-400 hover:text-cyan-300">Política de Privacidade</a>
-                    {' '}da Corridinha Mixuruca. Entendo que participarei por minha conta e risco, 
+                    {' '}da Corridinha Mixuruca. Entendo que participarei por minha conta e risco,
                     priorizando sempre a diversão e segurança.
                   </span>
                 </label>
@@ -400,7 +493,7 @@ const Registration: React.FC = () => {
                     : 'bg-gray-600 text-gray-400 cursor-not-allowed'
                 }`}
               >
-                {isFormValid() ? 'Me Inscrever Agora!' : 'Preencha todos os campos obrigatórios'}
+                {isFormValid() ? `Me Inscrever Agora! (Total: R$ ${totalPrice.toFixed(2).replace('.', ',')})` : 'Preencha todos os campos obrigatórios'}
               </button>
 
               <p className="text-center text-gray-400 text-sm mt-4">
