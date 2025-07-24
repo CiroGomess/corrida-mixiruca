@@ -1,20 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import { User, CreditCard, Clock, Users, CheckCircle, AlertCircle, Percent } from 'lucide-react'; // Adicionado Percent icon
+import { User, CreditCard, Clock, Users, CheckCircle, AlertCircle, Percent } from 'lucide-react';
+import services from '../services/services'; // Importe o seu serviço
+import Swal from 'sweetalert2';
+
+import ModalTermo from './modalTermo';
+
+// Definindo a interface para o tipo de dado de Corrida que vem da API
+interface Corrida {
+  id: number;
+  nome: string;
+  descricao: string;
+  percuso: string; // O percurso que você quer usar para a label
+  valor: string; // Vem como string, precisaremos converter para number
+  total_vagas: number;
+  total_inscricoes: number;
+  data_corrida: string;
+  data_limite_inscricao: string;
+  termos_aceite: string; // Novo campo para os termos
+  // Outros campos se houver
+}
+
+interface Cupom {
+  id: number;
+  codigo: string;
+  valor_desconto: string;
+  tipo_desconto: 'percentual' | 'fixo'; // ajuste se tiver mais tipos
+}
+
 
 const Registration: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    route: [] as string[],
+    dataNascimento: '', // <--- NOVO: Campo para Data de Nascimento
+    route: [] as number[], // Alterado para number[] para corresponder ao ID da corrida
     shirtSize: '',
     emergencyContact: '',
     emergencyPhone: '',
     experience: '',
-    dietary: '',
+    dietary: '', // Será mapeado para 'observacoes' no backend
     agreement: false,
-    coupon: '' // Novo campo para o cupom
+    coupon: ''
   });
+
+
 
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -23,52 +53,139 @@ const Registration: React.FC = () => {
     seconds: 0
   });
 
-  const [currentBatch] = useState(1);
   const [submitted, setSubmitted] = useState(false);
-  const [couponError, setCouponError] = useState(''); // Estado para mensagens de erro do cupom
+  const [couponError, setCouponError] = useState('');
+  const [availableCorridas, setAvailableCorridas] = useState<Corrida[]>([]); // Estado para armazenar as corridas da API
+  const [loadingCorridas, setLoadingCorridas] = useState(true); // Estado de carregamento
+  const [totalVagasRestantes, setTotalVagasRestantes] = useState(0); // Para exibir vagas restantes global
+  // const [termsAndConditions, setTermsAndConditions] = useState(''); // Estado para os termos
+  const [showModalTermo, setShowModalTermo] = useState(false);
 
-  const routes = [
-    { id: '5km', name: 'Passeio no Parque - 5km', price: 45.00 },
-    { id: '10km', name: 'Subida do Perrengue Leve - 10km', price: 55.00 },
-    { id: '15km', name: 'A Lama Chega no Joelho - 15km', price: 65.00 }
-  ];
+
+  const [availableCoupons, setAvailableCoupons] = useState<{ [key: string]: { discount: number, id: number } }>({});
+
 
   const shirtSizes = ['PP', 'P', 'M', 'G', 'GG', 'XGG'];
 
-  const batches = [
-    { number: 1, name: 'Super Desconto', period: 'Até 15/12', discount: '30%', available: true }
-  ];
 
-  // Cupons de exemplo (em um cenário real, viriam de um backend)
-  const availableCoupons: { [key: string]: number } = {
-    CORRE10: 0.10, // 10% de desconto
-    TRILHA20: 0.20, // 20% de desconto
-    MIXURUCA50: 0.50 // 50% de desconto
-  };
 
-  // Countdown Timer
+  // Carregar corridas do backend
   useEffect(() => {
-    const targetDate = new Date('2025-02-15T00:00:00').getTime();
-
-    const interval = setInterval(() => {
-      const now = new Date().getTime();
-      const distance = targetDate - now;
-
-      if (distance > 0) {
-        setTimeLeft({
-          days: Math.floor(distance / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-          minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
-          seconds: Math.floor((distance % (1000 * 60)) / 1000)
+    const fetchCorridas = async () => {
+      setLoadingCorridas(true);
+      const result = await services('/corridas', { method: 'GET' });
+      if (result.success && result.data && Array.isArray(result.data.corridas)) {
+        const now = new Date();
+        const futureCorridas = result.data.corridas.filter((corrida: Corrida) => {
+          const limiteInscricao = new Date(corrida.data_limite_inscricao + 'T23:59:59');
+          return limiteInscricao >= now;
         });
+
+        // Ordena as corridas futuras pela data limite de inscrição (mais próxima primeiro)
+        futureCorridas.sort((a: Corrida, b: Corrida) => {
+          const dateA = new Date(a.data_limite_inscricao).getTime();
+          const dateB = new Date(b.data_limite_inscricao).getTime();
+          return dateA - dateB;
+        });
+
+        setAvailableCorridas(futureCorridas);
+
+        // Calcula total de vagas restantes APENAS para a corrida mais próxima
+        if (futureCorridas.length > 0) {
+          const closestCorrida = futureCorridas[0];
+          setTotalVagasRestantes(closestCorrida.total_vagas - closestCorrida.total_inscricoes);
+
+          // Define a data limite da primeira corrida para o contador
+          const targetDateString = `${closestCorrida.data_limite_inscricao}T23:59:59`;
+          const targetDate = new Date(targetDateString).getTime();
+          updateCountdown(targetDate);
+
+          // Pega os termos de aceite da primeira corrida válida
+          // setTermsAndConditions(closestCorrida.termos_aceite || 'Eu concordo com os Termos e Condições do evento.');
+        } else {
+          // Se não houver corridas futuras, define uma data padrão para o contador zerar
+          setTotalVagasRestantes(0);
+          updateCountdown(new Date().getTime());
+          // setTermsAndConditions('Eu concordo com os Termos e Condições do evento.');
+        }
+
       } else {
-        clearInterval(interval);
+        Swal.fire('Erro', 'Não foi possível carregar as corridas.', 'error');
+        setAvailableCorridas([]);
+        setTotalVagasRestantes(0);
+      }
+      setLoadingCorridas(false);
+    };
+
+    const fetchCupons = async () => {
+      try {
+        const result = await services('/cupons', { method: 'GET' });
+        if (result.success && Array.isArray(result.data.cupons)) {
+          const mappedCoupons: { [key: string]: { discount: number, id: number } } = {};
+
+          (result.data.cupons as Cupom[])
+            .filter(c =>
+              typeof c.codigo === 'string' &&
+              typeof c.valor_desconto === 'string' &&
+              typeof c.tipo_desconto === 'string' &&
+              typeof c.id === 'number'
+            )
+            .forEach(cupom => {
+              const codigoUpper = cupom.codigo.toUpperCase();
+
+              mappedCoupons[codigoUpper] = {
+                discount: cupom.tipo_desconto === 'percentual'
+                  ? parseFloat(cupom.valor_desconto) / 100
+                  : parseFloat(cupom.valor_desconto),
+                id: cupom.id
+              };
+            });
+
+
+
+          setAvailableCoupons(mappedCoupons);
+        } else {
+          console.warn('Não foi possível carregar cupons.');
+        }
+      } catch (error) {
+        console.error('Erro ao buscar cupons:', error);
+      }
+    };
+
+    fetchCupons();
+    fetchCorridas();
+
+    // Configura o timer de contagem regressiva
+    const intervalId = setInterval(() => {
+      if (availableCorridas.length > 0) {
+        const closestCorrida = availableCorridas[0]; // Sempre pega a corrida mais próxima (já ordenada)
+        const targetDateString = `${closestCorrida.data_limite_inscricao}T23:59:59`;
+        const targetDate = new Date(targetDateString).getTime();
+        updateCountdown(targetDate);
+      } else {
         setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
       }
     }, 1000);
 
-    return () => clearInterval(interval);
-  }, []);
+    return () => clearInterval(intervalId); // Limpa o intervalo no unmount
+  }, [availableCorridas.length]); // Dependência adicionada para reavaliar o timer
+
+  // Função auxiliar para atualizar o estado do timeLeft
+  const updateCountdown = (targetTime: number) => {
+    const now = new Date().getTime();
+    const distance = targetTime - now;
+
+    if (distance > 0) {
+      setTimeLeft({
+        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((distance % (1000 * 60)) / 1000)
+      });
+    } else {
+      setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -78,7 +195,6 @@ const Registration: React.FC = () => {
       setFormData(prev => ({ ...prev, [name]: checked }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
-      // Limpa o erro do cupom ao digitar
       if (name === 'coupon') {
         setCouponError('');
       }
@@ -86,36 +202,54 @@ const Registration: React.FC = () => {
   };
 
   const handleRouteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value, checked } = e.target;
+    const routeId = parseInt(e.target.value); // Converte para número
+    const checked = e.target.checked;
+
     setFormData(prev => {
       const newRoutes = checked
-        ? [...prev.route, value]
-        : prev.route.filter(routeId => routeId !== value);
+        ? [...prev.route, routeId]
+        : prev.route.filter(id => id !== routeId);
       return { ...prev, route: newRoutes };
     });
   };
 
   const calculateTotalPrice = () => {
     let subtotal = formData.route.reduce((total, routeId) => {
-      const selectedRoute = routes.find(r => r.id === routeId);
-      return total + (selectedRoute ? selectedRoute.price : 0);
+      const selectedCorrida = availableCorridas.find(c => c.id === routeId);
+      return total + (selectedCorrida ? parseFloat(selectedCorrida.valor) : 0);
     }, 0);
 
     const couponCode = formData.coupon.toUpperCase();
+
+
     if (availableCoupons[couponCode]) {
-      const discount = subtotal * availableCoupons[couponCode];
-      subtotal -= discount;
+      const { discount } = availableCoupons[couponCode];
+
+      console.log(`Aplicando desconto de ${discount} no subtotal de R$ ${subtotal.toFixed(2)}`);
+
+      if (discount < 1) {
+        // Desconto percentual
+        subtotal -= subtotal * discount;
+      } else {
+        // Desconto fixo (valor absoluto)
+        subtotal -= discount;
+      }
+
+      if (subtotal < 0) subtotal = 0;
     }
+
 
     return subtotal;
   };
 
+
   const validateCoupon = () => {
     const couponCode = formData.coupon.toUpperCase();
     if (formData.coupon === '') {
-      setCouponError(''); // Limpa erro se o campo estiver vazio
+      setCouponError('');
       return;
     }
+
     if (availableCoupons[couponCode]) {
       setCouponError('Cupom válido!');
     } else {
@@ -124,23 +258,64 @@ const Registration: React.FC = () => {
   };
 
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Você pode querer validar o cupom novamente no submit aqui,
-    // ou apenas usar o valor do totalPrice que já considera o cupom.
-    console.log('Form submitted:', { ...formData, totalPrice: calculateTotalPrice() });
-    setSubmitted(true);
+    if (!isFormValid()) {
+      Swal.fire('Atenção', 'Por favor, preencha todos os campos obrigatórios.', 'warning');
+      return;
+    }
+
+    // Pega o ID do cupom, se houver
+    const couponCode = formData.coupon.toUpperCase();
+    const couponId = availableCoupons[couponCode] ? availableCoupons[couponCode].id : null;
+
+    // <--- MODIFICADO: Preparar os dados para envio no formato exato do backend
+    const dataToSend = {
+      nome_completo: formData.name,
+      telefone: formData.phone,
+      nome_contato_emergencia: formData.emergencyContact,
+      telefone_contato_emergencia: formData.emergencyPhone,
+      data_nascimento: formData.dataNascimento, // Mapeado diretamente
+      id_corrida: formData.route, // Array de IDs numéricos das corridas
+      tamanho_camisa: formData.shirtSize,
+      experiencia_trilha: formData.experience,
+      observacoes: formData.dietary, // Mapeado de 'dietary' para 'observacoes'
+      termos_aceitos: formData.agreement,
+      id_cupom_utilizado: couponId, // ID numérico do cupom, ou null
+      preco_final: parseFloat(calculateTotalPrice().toFixed(2)) // Preço final formatado como número
+    };
+
+    console.log('Dados enviados para o backend:', dataToSend); // Para depuração
+
+    // Aqui você enviaria os dados para o seu backend usando o serviço
+    // Exemplo:
+
+    try {
+      const response = await services('/inscricoes', { method: 'POST', data: dataToSend });
+      if (response.success) {
+        setSubmitted(true);
+        Swal.fire('Sucesso!', 'Sua inscrição foi realizada com sucesso!', 'success');
+      } else {
+        Swal.fire('Erro na Inscrição', response.data.message || 'Ocorreu um erro ao processar sua inscrição.', 'error');
+      }
+    } catch (error) {
+      Swal.fire('Erro', 'Ocorreu um erro inesperado ao tentar se inscrever.', 'error');
+      console.error('Erro ao enviar inscrição:', error);
+    }
+
+    setSubmitted(true); // Temporário para simular sucesso
   };
 
   const isFormValid = () => {
     return formData.name &&
-           formData.email &&
-           formData.phone &&
-           formData.route.length > 0 &&
-           formData.shirtSize &&
-           formData.emergencyContact &&
-           formData.emergencyPhone &&
-           formData.agreement;
+      formData.email &&
+      formData.phone &&
+      formData.dataNascimento && // <--- NOVO: Data de Nascimento é obrigatória
+      formData.route.length > 0 &&
+      formData.shirtSize &&
+      formData.emergencyContact &&
+      formData.emergencyPhone &&
+      formData.agreement;
   };
 
   if (submitted) {
@@ -161,7 +336,7 @@ const Registration: React.FC = () => {
                 <h3 className="text-lg font-semibold text-white mb-2">Próximos Passos:</h3>
                 <ul className="text-gray-300 space-y-1 text-sm">
                   <li>• Confirme o pagamento (PIX ou cartão)</li>
-                  <li>• Aguarde o e-mail com dados para retirada do kit</li>
+                  <li>• Aguarde o e-mail com dados</li>
                   <li>• Prepare-se para a melhor aventura da sua vida!</li>
                 </ul>
               </div>
@@ -172,9 +347,10 @@ const Registration: React.FC = () => {
     );
   }
 
-  const selectedRoutesDetails = formData.route.map(routeId =>
-    routes.find(r => r.id === routeId)
-  ).filter(Boolean);
+  // Filtrar as corridas selecionadas do formData.route com base nas availableCorridas
+  const selectedRoutesDetails = formData.route
+    .map(routeId => availableCorridas.find(corrida => corrida.id === routeId))
+    .filter(Boolean) as Corrida[]; // Assegura que o tipo é Corrida[]
 
   const totalPrice = calculateTotalPrice();
 
@@ -227,44 +403,18 @@ const Registration: React.FC = () => {
             <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50 sticky top-8">
               <h3 className="text-xl font-bold text-white mb-6 flex items-center">
                 <CreditCard className="w-6 h-6 mr-2 text-cyan-400" />
-                Lotes e Preços
+                Resumo da compra
               </h3>
-
-              <div className="space-y-4 mb-6">
-                {batches.map((batch) => (
-                  <div
-                    key={batch.number}
-                    className={`p-4 rounded-xl border ${
-                      batch.number === currentBatch
-                        ? 'bg-gradient-to-r from-purple-600/20 to-cyan-400/20 border-purple-500/50'
-                        : 'bg-black/30 border-gray-700/50'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-white font-semibold">{batch.name}</span>
-                      {batch.number === currentBatch && (
-                        <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs">
-                          ATUAL
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-sm text-gray-300">
-                      <p>{batch.period}</p>
-                      <p className="text-cyan-400 font-medium">{batch.discount} OFF</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
 
               {/* Percursos Selecionados e Total */}
               <div className="border-t border-gray-700/50 pt-4">
                 <h4 className="text-lg font-semibold text-white mb-3">Seus Percursos:</h4>
                 {selectedRoutesDetails.length > 0 ? (
                   <div className="space-y-2">
-                    {selectedRoutesDetails.map((route) => (
-                      <div key={route!.id} className="flex justify-between items-center text-sm">
-                        <span className="text-gray-300">{route!.name}</span>
-                        <span className="text-cyan-400 font-medium">R$ {route!.price.toFixed(2).replace('.', ',')}</span>
+                    {selectedRoutesDetails.map((corrida) => (
+                      <div key={corrida.id} className="flex justify-between items-center text-sm">
+                        <span className="text-gray-300">{corrida.percuso}</span>
+                        <span className="text-cyan-400 font-medium">R$ {parseFloat(corrida.valor).toFixed(2).replace('.', ',')}</span>
                       </div>
                     ))}
                     <div className="flex justify-between items-center text-base font-bold text-white mt-4 pt-2 border-t border-gray-700/50">
@@ -282,7 +432,11 @@ const Registration: React.FC = () => {
                   <Users className="w-5 h-5 text-green-400" />
                   <span className="text-white font-semibold">Vagas Restantes</span>
                 </div>
-                <p className="text-green-400 text-sm">Apenas 47 vagas disponíveis!</p>
+                {loadingCorridas ? (
+                  <p className="text-green-400 text-sm">Carregando vagas...</p>
+                ) : (
+                  <p className="text-green-400 text-sm">Apenas {totalVagasRestantes} vagas disponíveis!</p>
+                )}
               </div>
             </div>
           </div>
@@ -335,6 +489,20 @@ const Registration: React.FC = () => {
                   />
                 </div>
 
+                {/* --- NOVO CAMPO: Data de Nascimento --- */}
+                <div>
+                  <label className="block text-gray-300 font-medium mb-2">Data de Nascimento *</label>
+                  <input
+                    type="date"
+                    name="dataNascimento"
+                    value={formData.dataNascimento}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-black/30 border border-gray-700/50 rounded-xl text-white focus:border-cyan-400 focus:outline-none transition-colors [color-scheme:dark]" // [color-scheme:dark] para estilizar o calendário
+                    required
+                  />
+                </div>
+                {/* ------------------------------------ */}
+
                 <div>
                   <label className="block text-gray-300 font-medium mb-2">Tamanho da Camiseta *</label>
                   <select
@@ -354,29 +522,34 @@ const Registration: React.FC = () => {
 
               <div className="mb-8">
                 <label className="block text-gray-300 font-medium mb-2">Percurso(s) Escolhido(s) *</label>
-                <div className="grid md:grid-cols-3 gap-4">
-                  {routes.map((route) => (
-                    <label
-                      key={route.id}
-                      className={`cursor-pointer p-4 rounded-xl border transition-all ${
-                        formData.route.includes(route.id)
+                {loadingCorridas ? (
+                  <p className="text-gray-400">Carregando percursos...</p>
+                ) : availableCorridas.length > 0 ? (
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {availableCorridas.map((corrida) => (
+                      <label
+                        key={corrida.id}
+                        className={`cursor-pointer p-4 rounded-xl border transition-all ${formData.route.includes(corrida.id)
                           ? 'bg-gradient-to-r from-purple-600/20 to-cyan-400/20 border-purple-500/50'
                           : 'bg-black/30 border-gray-700/50 hover:border-gray-600/50'
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        name="route"
-                        value={route.id}
-                        checked={formData.route.includes(route.id)}
-                        onChange={handleRouteChange}
-                        className="mr-2 mt-1 w-4 h-4 text-cyan-400 bg-black/30 border border-gray-700/50 rounded focus:ring-cyan-400 focus:ring-2"
-                      />
-                      <div className="text-white font-semibold mb-1">{route.name}</div>
-                      <div className="text-cyan-400 font-medium">R$ {route.price.toFixed(2).replace('.', ',')}</div>
-                    </label>
-                  ))}
-                </div>
+                          }`}
+                      >
+                        <input
+                          type="checkbox"
+                          name="route"
+                          value={corrida.id}
+                          checked={formData.route.includes(corrida.id)}
+                          onChange={handleRouteChange}
+                          className="mr-2 mt-1 w-4 h-4 text-cyan-400 bg-black/30 border border-gray-700/50 rounded focus:ring-cyan-400 focus:ring-2"
+                        />
+                        <div className="text-white font-semibold mb-1">{corrida.percuso}</div>
+                        <div className="text-cyan-400 font-medium">R$ {parseFloat(corrida.valor).toFixed(2).replace('.', ',')}</div>
+                      </label>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-red-400 text-sm">Nenhuma corrida disponível no momento ou com inscrições abertas.</p>
+                )}
               </div>
 
               {/* Campo do Cupom */}
@@ -391,7 +564,7 @@ const Registration: React.FC = () => {
                     name="coupon"
                     value={formData.coupon}
                     onChange={handleInputChange}
-                    onBlur={validateCoupon} // Valida quando o campo perde o foco
+                    onBlur={validateCoupon}
                     className="w-full px-4 py-3 bg-black/30 border border-gray-700/50 rounded-xl text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none transition-colors"
                     placeholder="Insira seu cupom aqui"
                   />
@@ -452,14 +625,14 @@ const Registration: React.FC = () => {
               </div>
 
               <div className="mb-8">
-                <label className="block text-gray-300 font-medium mb-2">Restrições Alimentares</label>
+                <label className="block text-gray-300 font-medium mb-2">Restrições Alimentares / Observações</label>
                 <textarea
-                  name="dietary"
+                  name="dietary" // O nome do estado é 'dietary', mas será mapeado para 'observacoes' no envio
                   value={formData.dietary}
                   onChange={handleInputChange}
                   rows={3}
                   className="w-full px-4 py-3 bg-black/30 border border-gray-700/50 rounded-xl text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none transition-colors"
-                  placeholder="Descreva suas restrições alimentares, se houver"
+                  placeholder="Descreva suas restrições alimentares ou outras observações"
                 />
               </div>
 
@@ -475,9 +648,7 @@ const Registration: React.FC = () => {
                   />
                   <span className="text-gray-300 text-sm">
                     Eu concordo com os{' '}
-                    <a href="#" className="text-cyan-400 hover:text-cyan-300">Termos e Condições</a>
-                    {' '}e{' '}
-                    <a href="#" className="text-cyan-400 hover:text-cyan-300">Política de Privacidade</a>
+                    <a href="#" className="text-cyan-400 hover:text-cyan-300" onClick={(e) => { e.preventDefault(); setShowModalTermo(true); }}>Termos e Condições</a>
                     {' '}da Corridinha Mixuruca. Entendo que participarei por minha conta e risco,
                     priorizando sempre a diversão e segurança.
                   </span>
@@ -487,11 +658,10 @@ const Registration: React.FC = () => {
               <button
                 type="submit"
                 disabled={!isFormValid()}
-                className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-200 ${
-                  isFormValid()
-                    ? 'bg-gradient-to-r from-purple-600 to-cyan-400 text-white hover:scale-105 transform'
-                    : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                }`}
+                className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-200 ${isFormValid()
+                  ? 'bg-gradient-to-r from-purple-600 to-cyan-400 text-white hover:scale-105 transform'
+                  : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  }`}
               >
                 {isFormValid() ? `Me Inscrever Agora! (Total: R$ ${totalPrice.toFixed(2).replace('.', ',')})` : 'Preencha todos os campos obrigatórios'}
               </button>
@@ -500,6 +670,9 @@ const Registration: React.FC = () => {
                 * Campos obrigatórios | Processamento seguro garantido
               </p>
             </form>
+
+            <ModalTermo isOpen={showModalTermo} onClose={() => setShowModalTermo(false)} />
+
           </div>
         </div>
       </div>
